@@ -1,66 +1,90 @@
 #!/usr/bin/python3
 
+def updateMatrix(mat, x, y):
+    mat[x][y] = mat[x-1][y] + mat[x+1][y] + mat[x-1][y-1] + mat[x][y-1] + mat[x+1][y-1] + mat[x-1][y+1] + mat[x][y+1] + mat[x+1][y+1]
+
 input = 289326
-#input = 1024
 
-#The bottom right corner of level n is given by (2*n+1)^2 (This is the largest number in that certain loop of the spiral)
-#Examples:
-#The first level is n=0, with the only element being 1
-##(2*0+1)^2 = 1^2 = 1 
-#The second level is n=1, with the bottom right corner (and max element in this level) being 9
-##(2*1 + 1)^2 = 3^2 = 9
-#The third level is n=2, with the max element being 25
-##(2*2 + 1)^2 = 5^2 = 25
-#The fourth level is n=3, with the max element being 49
-##(2*3 + 1)^2 = (6+1)^2 = 7^2 = 49
+#Defining constants for size of matrix (might change depending on input)
+MAT_HEIGHT = 13
+MAT_WIDTH = 13
 
-#The first element of a level always has distance equal to the n of that level + the n of the previous level
-#The distance in a level varies between the level n (cardinal directions) and level n*2 (corners)
+#Creating zero initialized matrix
+matrix = [[0 for x in range(0, MAT_WIDTH)] for y in range(0, MAT_HEIGHT)]
 
-print("The input is %d" % (input))
+#Starting values
+x = MAT_HEIGHT // 2
+y = MAT_WIDTH // 2
+matrix[x][y] = 1 #Starting with 1 in the center
+lvl = 0
 
-######
-i = 0
-num = 0
-lvlmaxes = []
-while(num < input):
-   num = (2*i + 1) ** 2
-   lvlmaxes.append(num)
-   i+=1
+found = False
 
-print(lvlmaxes)
-#print("i = %d" % (i))
+while not found:
+    lvl += 1
+    x += 1
 
-inputn = i - 1
-#At this point inputn is the n of the level of the input (we have to decrement 1 due to how the loop is built)
-print("input n: %d" % (inputn))
-
-#The distance of the first element of a certain level is always its n + (n-1) which is the same as 2*n-1
-
-#For each element in a line, its distance can be given by n+k, in which k belongs to [0,n]
-#The value of k goes back and forth, by starting to lower until it is 0 and then come back up
-#The initial value of k is the line n - 1
-#k = inputn - 1
-#The delta is the current step of k
-#delta = -1
-
-dist = 0
-
-#Calculating each corner of level n
-corners = []
-for x in range(0, 4):
-    corners.append(lvlmaxes[len(lvlmaxes)-1] - x*(inputn * 2))
-    if input == corners[x]:
-        dist = inputn*2
+    updateMatrix(matrix, x, y)
+    if(matrix[x][y] > input):
+        print(matrix[x][y], "is bigger than the input.")
+        found = True
         break
 
-print(corners)
+    #The actual level side size but minus 1 since we always use it -1
+    lvl_side_size = (2*lvl + 1) - 1
 
+    #We update the variables in each loop because we want to use the updated values afterwards
 
-if dist == 0:
-    for y in range(0, 3):
-        if (input < corners[y]) and (input > corners[y+1]):
-            dist = inputn*2 - min(abs(input - corners[y]), abs(input - corners[y+1]))
+    #going up
+    for i in range(0, lvl_side_size - 1):
+        y += 1
+        updateMatrix(matrix, x, y)
+        if(matrix[x][y] > input):
+            print(matrix[x][y], "is bigger than the input.")
+            found = True
             break
 
-print("The distance is %d" % (dist))
+    #Avoiding excess processing
+    if found:
+        break
+
+    #going left (on top)
+    for i in range(0, lvl_side_size):
+        x -= 1
+        updateMatrix(matrix, x, y)
+        if(matrix[x][y] > input):
+            print(matrix[x][y], "is bigger than the input.")
+            found = True
+            break
+
+    #Avoiding excess processing
+    if found:
+        break
+
+    #going down (on the right)
+    for i in range(0, lvl_side_size):
+        y -= 1
+        updateMatrix(matrix, x, y) 
+        if(matrix[x][y] > input):
+            print(matrix[x][y], "is bigger than the input.")
+            found = True
+            break
+
+    #Avoiding excess processing
+    if found:
+        break
+
+    #going right (on the bottom)
+    for i in range(0, lvl_side_size):
+        x += 1
+        updateMatrix(matrix, x, y) 
+        if(matrix[x][y] > input):
+            print(matrix[x][y], "is bigger than the input.")
+            found = True
+            break
+
+
+for line in matrix:
+    for val in line:
+        print(val, end='\t')
+    print()
